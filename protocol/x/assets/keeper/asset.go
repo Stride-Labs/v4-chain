@@ -2,6 +2,7 @@ package keeper
 
 import (
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	indexerevents "github.com/dydxprotocol/v4-chain/protocol/indexer/events"
 	"github.com/dydxprotocol/v4-chain/protocol/indexer/indexer_manager"
 	"math/big"
@@ -388,5 +389,5 @@ func (k Keeper) ConvertAssetToCoin(
 
 	bigConvertedQuantums := bigRatConvertedQuantums.Num()
 
-	return bigConvertedQuantums, sdk.NewCoin(asset.Denom, sdk.NewIntFromBigInt(bigConvertedDenomAmount)), nil
+	return bigConvertedQuantums, sdk.NewCoin(asset.Denom, sdkmath.NewIntFromBigInt(bigConvertedDenomAmount)), nil
 }

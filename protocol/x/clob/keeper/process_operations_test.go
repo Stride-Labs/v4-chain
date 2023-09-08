@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"testing"
 	"time"
 
@@ -1585,7 +1586,7 @@ func setupProcessProposerOperationsTestCase(
 			mock.Anything,
 			mock.Anything,
 			mock.Anything,
-		).Return(sdk.NewCoin("USDC", sdk.NewIntFromUint64(tc.insuranceFundBalance)))
+		).Return(sdk.NewCoin("USDC", sdkmath.NewIntFromUint64(tc.insuranceFundBalance)))
 	}
 
 	mockIndexerEventManager = &mocks.IndexerEventManager{}
