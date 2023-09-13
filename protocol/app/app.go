@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dydxprotocol/v4-chain/protocol/lib"
 	"github.com/dydxprotocol/v4-chain/protocol/x/clob/rate_limit"
 
 	pricefeed_types "github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/types"
@@ -100,6 +101,7 @@ import (
 	// Lib
 	"github.com/dydxprotocol/v4-chain/protocol/lib"
 	"github.com/dydxprotocol/v4-chain/protocol/lib/metrics"
+	"github.com/dydxprotocol/v4-chain/protocol/lib/time"
 
 	// Mempool
 	"github.com/dydxprotocol/v4-chain/protocol/mempool"
@@ -493,7 +495,7 @@ func New(
 		tkeys[indexer_manager.TransientStoreKey],
 		indexerFlags.SendOffchainData,
 	)
-	timeProvider := &lib.TimeProviderImpl{}
+	timeProvider := &time.TimeProviderImpl{}
 
 	app.EpochsKeeper = *epochsmodulekeeper.NewKeeper(
 		appCodec,
@@ -594,6 +596,11 @@ func New(
 		pricesmoduletypes.NewMarketToSmoothedPrices(pricesmoduletypes.SmoothedPriceTrackingBlockHistoryLength),
 		timeProvider,
 		app.IndexerEventManager,
+		// set the governance and delaymsg module accounts as the authority for conducting upgrades
+		[]string{
+			authtypes.NewModuleAddress(delaymsgmoduletypes.ModuleName).String(),
+			authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		},
 	)
 	pricesModule := pricesmodule.NewAppModule(appCodec, app.PricesKeeper, app.AccountKeeper, app.BankKeeper)
 
@@ -766,8 +773,14 @@ func New(
 		appCodec,
 		keys[sendingmoduletypes.StoreKey],
 		app.AccountKeeper,
+		app.BankKeeper,
 		app.SubaccountsKeeper,
 		app.IndexerEventManager,
+		// gov module and delayMsg module accounts are allowed to send messages to the sending module.
+		[]string{
+			authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+			authtypes.NewModuleAddress(delaymsgmoduletypes.ModuleName).String(),
+		},
 	)
 	sendingModule := sendingmodule.NewAppModule(
 		appCodec,
@@ -1185,6 +1198,7 @@ func (app *App) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.Res
 	app.IndexerEventManager.SendOnchainData(block)
 	app.IndexerEventManager.ClearEvents(ctx)
 
+	app.Logger().Info("Initialized chain", "blockHeight", ctx.BlockHeight())
 	return initResponse
 }
 
