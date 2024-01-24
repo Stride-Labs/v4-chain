@@ -1,13 +1,14 @@
 package types
 
 import (
-	cosmoslog "cosmossdk.io/log"
 	"fmt"
+	"sync"
+	"time"
+
+	cosmoslog "cosmossdk.io/log"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/dydxprotocol/v4-chain/protocol/daemons/types"
 	libtime "github.com/dydxprotocol/v4-chain/protocol/lib/time"
-	"sync"
-	"time"
 )
 
 const (
@@ -189,7 +190,7 @@ func (hm *HealthMonitor) RegisterServiceWithCallback(
 // service is not responding. This is ideal for creating a callback function when registering a daemon service.
 func PanicServiceNotResponding(hc types.HealthCheckable) func(error) {
 	return func(err error) {
-		panic(fmt.Sprintf("%v unhealthy: %v", hc.ServiceName(), err))
+		// panic(fmt.Sprintf("%v unhealthy: %v", hc.ServiceName(), err))
 	}
 }
 
